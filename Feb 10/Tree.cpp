@@ -33,12 +33,6 @@ void leerPersona (TPersona &persona)
 		std::cin >> persona.DNI;
 	} while (isFloat(persona.DNI));
 }
-void copiarPersona (TPersona &personaAModificar,TPersona &personaACopiar)
-{
-	personaAModificar.nombre = personaACopiar.nombre;
-	personaAModificar.edad = personaACopiar.edad;
-	personaAModificar.DNI = personaACopiar.DNI;
-}
 
 typedef struct arbol 
 {
@@ -53,34 +47,33 @@ void agregarElemento (arbol *&arbolAModificar,TPersona personaAInsertar)
 	{
 		arbolAModificar->ramaDer = new arbol;
 		arbolAModificar = arbolAModificar->ramaDer;
-		copiarPersona(arbolAModificar->persona,personaAInsertar);
+		arbolAModificar->persona = personaAInsertar;
 		return;
 	}
 	arbol *copia = arbolAModificar; 
 	// recorrido
-	while (arbolAModificar != NULL)
+	while (copia != NULL)
 	{
-		if (arbolAModificar->persona.DNI > personaAInsertar.DNI)
+		if (copia->persona.DNI > personaAInsertar.DNI)
 		{
-			arbolAModificar = arbolAModificar->ramaIzq;
-			if (arbolAModificar == NULL)
+			copia = copia->ramaIzq;
+			if (copia == NULL) // significa que está vacío
 			{
-				arbolAModificar = new arbol;
-				break;
+				copia = new arbol; // creamos un nuevo puntero
+				break; // salimos
 			}
 		}
 		else
 		{
-			arbolAModificar = arbolAModificar->ramaDer;
-			if (arbolAModificar == NULL)
+			copia = copia->ramaDer;
+			if (copia == NULL) // significa que está vacío
 			{
-				arbolAModificar = new arbol;
-				break;
+				copia = new arbol; // creamos un nuevo puntero
+				break; // salimos
 			}
 		}
 	}
-	copiarPersona(arbolAModificar->persona,personaAInsertar);
-	arbolAModificar = copia;
+	copia->persona = personaAInsertar;
 }
 
 arbol* buscarRama(arbol *&arbolAExaminar,TPersona personaABuscar)
@@ -109,6 +102,100 @@ arbol* buscarRama(arbol *&arbolAExaminar,TPersona personaABuscar)
 	return NULL;
 }
 
+arbol* eliminarRama(arbol *&arbolAModificar)
+{
+	arbol *copia = arbolAModificar;
+	float DNIAEliminar = 0;
+	int ramaDir = 0;
+	arbol *aEliminar; // a este puntero le hago delete
+	arbol *acomodador; // este puntero me facilita la acomodación de los elementos que están en el nodo que voy a usar para reemplazar
+	do
+	{
+		std::cout << "Ingrese el DNI que va a Eliminar: ";
+		std::cin >> DNIAEliminar;
+	} while (isFloat(DNIAEliminar));
+	while (copia)
+	{
+		if (copia->ramaIzq->persona.DNI == DNIAEliminar || copia->ramaDer->persona.DNI == DNIAEliminar)
+		{
+			if (copia->ramaIzq->persona.DNI == DNIAEliminar)
+			{
+				ramaDir = 1;
+			}
+			else
+			{
+				ramaDir = 2;
+			}
+			break;
+		}
+		else
+		{
+			if (copia->persona.DNI > DNIAEliminar)
+			{
+				copia = copia->ramaIzq;
+			}
+			else
+			{
+				copia = copia->ramaDer;
+			}
+		}
+	}
+	switch (ramaDir)
+	{
+	case 1: // izq
+		aEliminar = copia->ramaIzq;
+		break;
+	
+	case 2: // der
+		aEliminar = copia->ramaDer;
+		break;
+	}
+	if (!aEliminar->ramaDer && !aEliminar->ramaIzq)
+	{
+		copia = aEliminar;
+		copia = NULL;
+		return aEliminar;
+	}
+	else
+	{
+		if (aEliminar->ramaDer)
+		{
+			acomodador = aEliminar->ramaDer;
+			if (acomodador->ramaIzq)
+			{
+				if (acomodador->ramaDer)
+				{
+					acomodador->ramaDer->ramaIzq = acomodador->ramaIzq;
+				}
+				if (aEliminar->ramaIzq)
+				{
+					acomodador->ramaIzq = aEliminar->ramaIzq;
+				}
+			}
+		}
+		else
+		{
+			acomodador = aEliminar->ramaIzq;
+			if (acomodador->ramaIzq)
+			{
+				if (acomodador->ramaDer)
+				{
+					acomodador->ramaDer->ramaIzq = acomodador->ramaIzq;
+				}
+			}
+		}
+	}
+	switch (ramaDir)
+	{
+	case 1: // izq
+		copia->ramaIzq = aEliminar;
+		break;
+	case 2: // der
+		copia->ramaDer = aEliminar;
+		break;
+	}
+	return aEliminar;
+}
 int main ()
 {
 	
