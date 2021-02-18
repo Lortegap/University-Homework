@@ -176,27 +176,47 @@ arbol* eliminarRama(arbol *&arbolAModificar)
 		else
 		{
 			acomodador = aEliminar->ramaIzq;
+			/*
 			if (acomodador->ramaIzq)
 			{
 				if (acomodador->ramaDer)
 				{
 					acomodador->ramaDer->ramaIzq = acomodador->ramaIzq;
 				}
-			}
+			}*/
 		}
 	}
 	switch (ramaDir)
 	{
 	case 1: // izq
-		copia->ramaIzq = aEliminar;
+		copia->ramaIzq = acomodador;
 		break;
 	case 2: // der
-		copia->ramaDer = aEliminar;
+		copia->ramaDer = acomodador;
 		break;
 	}
 	return aEliminar;
 }
 int main ()
 {
+	float anadirElemento = 0;
+	arbol *arbolAUsar;
+	do
+	{
+		std::cout << "¿Deseas añadir un elemento?\n1. Sí 2. No\nElección: ";
+		std::cin >> anadirElemento;
+	} while (anadirElemento != 2);
+
+	float buscarElemento = 0;
+	do
+	{
+		std::cout << "Ingrese el DNI que desea buscar. Ingrese 0 para salir.";
+	} while (buscarElemento != 0);
+	
+	float eliminarElemento = 0;
+	do
+	{
+		std::cout << "Ingrese el DNI que desea eliminar. Ingrese 0 para salir.";
+	} while (eliminarElemento != 0);
 	
 }

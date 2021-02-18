@@ -39,7 +39,7 @@ typedef struct arbol
 	TPersona persona;
 	arbol *ramaDer = NULL;
 	arbol *ramaIzq = NULL;
-	//arbol *anterior = NULL;
+	arbol *anterior = NULL;
 	
 };
 
@@ -72,6 +72,35 @@ int contarAltura (arbol *&arbolAExaminar) // usese con un brazo, ya sea el derec
 	return contador;
 }
 
+void acomodarArbol (arbol *&arbolAAcomodar, int insercionDir)
+{
+	arbol *copia = arbolAAcomodar;
+	int contadorDer = contarAltura(copia->ramaDer);
+	int contadorIzq = contarAltura(copia->ramaIzq);
+	switch (insercionDir)
+	{
+	case 1: // izq
+		if (contadorDer - contadorIzq < 1)
+		{
+			copia = copia->ramaIzq;
+			copia->ramaDer = arbolAAcomodar;
+			arbolAAcomodar->ramaIzq = NULL;
+			arbolAAcomodar = copia;
+		}
+		break;
+	
+	case 2: // der
+		if (contadorDer - contadorIzq > 1)
+		{
+			copia = copia->ramaDer;
+			copia->ramaIzq = arbolAAcomodar;
+			arbolAAcomodar->ramaDer = NULL;
+			arbolAAcomodar = copia;
+		}
+		break;
+	}
+}
+
 void agregarElemento (arbol *&arbolAModificar,TPersona personaAInsertar)
 {
 	if (!arbolAModificar->ramaDer && !arbolAModificar->ramaIzq) // empezamos desde ramaDer
@@ -83,44 +112,80 @@ void agregarElemento (arbol *&arbolAModificar,TPersona personaAInsertar)
 	}
 	arbol *copia = arbolAModificar; 
 	// recorrido
-	
+	int insercionDir = 0; // 1 para izq, 2 para der
 	while (copia != NULL)
 	{
 		if (copia->persona.DNI > personaAInsertar.DNI)
 		{
-			copia = copia->ramaIzq;
-			if (copia == NULL) // significa que está vacío
+			if (copia->ramaIzq == NULL) // significa que está vacío
 			{
-				copia = new arbol; // creamos un nuevo puntero
+				copia->ramaIzq = new arbol; // creamos un nuevo puntero
+				copia->ramaIzq->anterior = copia;
+				copia = copia->ramaIzq;
+				insercionDir = 1;
 				break; // salimos
 			}
+			copia = copia->ramaIzq;
 		}
 		else
 		{
-			copia = copia->ramaDer;
-			if (copia == NULL) // significa que está vacío
+			if (copia->ramaDer == NULL) // significa que está vacío
 			{
-				copia = new arbol; // creamos un nuevo puntero
+				copia->ramaDer = new arbol; // creamos un nuevo puntero
+				copia->ramaDer->anterior = copia;
+				copia = copia->ramaDer;
+				insercionDir = 2;
 				break; // salimos
 			}
+			copia = copia->ramaDer;
 		}
 	}
+	copia->persona.nivel = copia->anterior->persona.nivel + 1;
 	copia->persona = personaAInsertar;
-	//acomodar
-	int contadorDer = contarAltura(arbolAModificar->ramaDer);
-	int contadorIzq = contarAltura(arbolAModificar->ramaIzq);
-	if (contadorDer - contadorIzq > 1 || contadorDer - contadorIzq < 1)
+	copia = arbolAModificar;
+	int alturaDer = 0;
+	int alturaIzq = 0;
+	arbol *acomodador;
+	do
 	{
-		if (contadorDer - contadorIzq > 1) // acomodar derecho
+		alturaDer = contarAltura(copia->ramaDer);
+		alturaIzq = contarAltura(copia->ramaIzq);
+		if (alturaDer - alturaIzq < 1)
 		{
-			
-		}
-		else // acomodar izquierdo
-		{
+			acomodador = copia->ramaIzq;
 			
 		}
 		
-	}
+
+	} while (alturaDer - alturaIzq != 0 || alturaDer - alturaIzq != 1);
+	
+	
+	
+	
 	
 
+}
+
+int main ()
+{
+	float anadirElemento = 0;
+	arbol *arbolAUsar;
+	do
+	{
+		std::cout << "¿Deseas añadir un elemento?\n1. Sí 2. No\nElección: ";
+		std::cin >> anadirElemento;
+	} while (anadirElemento != 2);
+
+	float buscarElemento = 0;
+	do
+	{
+		std::cout << "Ingrese el DNI que desea buscar. Ingrese 0 para salir.";
+	} while (buscarElemento != 0);
+	
+	float eliminarElemento = 0;
+	do
+	{
+		std::cout << "Ingrese el DNI que desea eliminar. Ingrese 0 para salir.";
+	} while (eliminarElemento != 0);
+	
 }
