@@ -43,7 +43,7 @@ typedef struct arbol
 	
 };
 
-int contarAltura (arbol *&arbolAExaminar) // usese con un brazo, ya sea el derecho o el izquierdo
+int contarAltura (arbol *&arbolAExaminar)// usese con un brazo, ya sea el derecho o el izquierdo
 {
 	arbol *copia = arbolAExaminar;
 	int contador = 0;
@@ -72,98 +72,110 @@ int contarAltura (arbol *&arbolAExaminar) // usese con un brazo, ya sea el derec
 	return contador;
 }
 
-void acomodarArbol (arbol *&arbolAAcomodar, int insercionDir)
+void agregarElemento (arbol *&arbolAModificar)
 {
-	arbol *copia = arbolAAcomodar;
-	int contadorDer = contarAltura(copia->ramaDer);
-	int contadorIzq = contarAltura(copia->ramaIzq);
-	switch (insercionDir)
+	TPersona personaAInsertar;
+	leerPersona(personaAInsertar);
+	if (!arbolAModificar->ramaDer && !arbolAModificar->ramaIzq) // vacio
 	{
-	case 1: // izq
-		if (contadorDer - contadorIzq < 1)
-		{
-			copia = copia->ramaIzq;
-			copia->ramaDer = arbolAAcomodar;
-			arbolAAcomodar->ramaIzq = NULL;
-			arbolAAcomodar = copia;
-		}
-		break;
-	
-	case 2: // der
-		if (contadorDer - contadorIzq > 1)
-		{
-			copia = copia->ramaDer;
-			copia->ramaIzq = arbolAAcomodar;
-			arbolAAcomodar->ramaDer = NULL;
-			arbolAAcomodar = copia;
-		}
-		break;
-	}
-}
-
-void agregarElemento (arbol *&arbolAModificar,TPersona personaAInsertar)
-{
-	if (!arbolAModificar->ramaDer && !arbolAModificar->ramaIzq) // empezamos desde ramaDer
-	{
-		arbolAModificar->ramaDer = new arbol;
-		arbolAModificar = arbolAModificar->ramaDer;
+		arbolAModificar = new arbol;
 		arbolAModificar->persona = personaAInsertar;
 		return;
 	}
-	arbol *copia = arbolAModificar; 
-	// recorrido
-	int insercionDir = 0; // 1 para izq, 2 para der
-	while (copia != NULL)
+	// añadir
+	arbol *copia = arbolAModificar;
+	arbol *extra = NULL;
+	int alturaDer = contarAltura(copia->ramaDer);
+	int alturaIzq = contarAltura(copia->ramaIzq);
+	int izq = 0;
+	int der = 0;
+	while (copia)
 	{
-		if (copia->persona.DNI > personaAInsertar.DNI)
+		if (copia->persona.DNI == personaAInsertar.DNI)
 		{
-			if (copia->ramaIzq == NULL) // significa que está vacío
-			{
-				copia->ramaIzq = new arbol; // creamos un nuevo puntero
-				copia->ramaIzq->anterior = copia;
-				copia = copia->ramaIzq;
-				insercionDir = 1;
-				break; // salimos
-			}
-			copia = copia->ramaIzq;
+			std::cout << "No se puede agregar a una persona con el mismo número de DNI. Saliendo...\n";
+			return;
 		}
 		else
 		{
-			if (copia->ramaDer == NULL) // significa que está vacío
+			if (copia->persona.DNI > personaAInsertar.DNI) 
 			{
-				copia->ramaDer = new arbol; // creamos un nuevo puntero
-				copia->ramaDer->anterior = copia;
-				copia = copia->ramaDer;
-				insercionDir = 2;
-				break; // salimos
+				
+				if (!copia->ramaIzq)
+				{
+					alturaIzq = contarAltura(copia->ramaIzq);
+					copia->ramaIzq = new arbol;
+					if (alturaDer - alturaIzq + 1 < 2)
+					{
+						if (der && izq)
+						{
+							copia->ramaIzq->persona = personaAInsertar;
+							copia->ramaIzq->ramaDer = copia;
+							copia->ramaIzq->ramaIzq = extra;
+							extra = copia->ramaIzq;
+							break;
+						}
+						else
+						{
+							copia->ramaDer = extra;
+							copia->ramaIzq->persona = personaAInsertar;
+							extra->ramaIzq = NULL;
+							extra = copia;
+							break;
+						}
+					}
+				}
+				extra = copia;
+				copia = copia->ramaIzq;
+				if (izq != 1)
+				{
+					izq = 1;
+				}
+				else
+				{
+					izq = 0;
+				}
 			}
-			copia = copia->ramaDer;
-		}
-	}
-	copia->persona.nivel = copia->anterior->persona.nivel + 1;
-	copia->persona = personaAInsertar;
-	copia = arbolAModificar;
-	int alturaDer = 0;
-	int alturaIzq = 0;
-	arbol *acomodador;
-	do
-	{
-		alturaDer = contarAltura(copia->ramaDer);
-		alturaIzq = contarAltura(copia->ramaIzq);
-		if (alturaDer - alturaIzq < 1)
-		{
-			acomodador = copia->ramaIzq;
+			else
+			{
+				if (!copia->ramaDer)
+				{
+					alturaDer = contarAltura(copia->ramaDer);
+					copia->ramaDer = new arbol;
+					if (alturaDer + 1 - alturaIzq > 2)
+					{
+						if (der && izq)
+						{
+							copia->ramaDer->persona = personaAInsertar;
+							copia->ramaDer->ramaIzq = copia;
+							copia->ramaDer->ramaDer = extra;
+							extra = copia->ramaDer;
+							break;
+						}
+						else
+						{
+							copia->ramaIzq = extra;
+							copia->ramaDer->persona = personaAInsertar;
+							extra->ramaDer = NULL;
+							extra = copia;
+							break;
+						}
+					}
+				}
+				extra = copia;
+				copia = copia->ramaDer;
+				if (der != 1)
+				{
+					der = 1;
+				}
+				else
+				{
+					der = 0;
+				}
+			}
 			
 		}
-		
-
-	} while (alturaDer - alturaIzq != 0 || alturaDer - alturaIzq != 1);
-	
-	
-	
-	
-	
-
+	}
 }
 
 int main ()
@@ -174,18 +186,9 @@ int main ()
 	{
 		std::cout << "¿Deseas añadir un elemento?\n1. Sí 2. No\nElección: ";
 		std::cin >> anadirElemento;
+		if (anadirElemento)
+		{
+			agregarElemento(arbolAUsar);
+		}
 	} while (anadirElemento != 2);
-
-	float buscarElemento = 0;
-	do
-	{
-		std::cout << "Ingrese el DNI que desea buscar. Ingrese 0 para salir.";
-	} while (buscarElemento != 0);
-	
-	float eliminarElemento = 0;
-	do
-	{
-		std::cout << "Ingrese el DNI que desea eliminar. Ingrese 0 para salir.";
-	} while (eliminarElemento != 0);
-	
 }
